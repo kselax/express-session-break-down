@@ -5,7 +5,7 @@
  * Copyright(c) 2014-2015 Douglas Christopher Wilson
  * MIT Licensed
  */
- 
+
 // it doesn't allow use some syntax
 'use strict';
 
@@ -23,6 +23,7 @@ var uid = require('uid-safe').sync
   , onHeaders = require('on-headers')
   , signature = require('cookie-signature')
 
+// here we return a Session object from file to var Session and others
 var Session = require('./session/session')
   , MemoryStore = require('./session/memory')
   , Cookie = require('./session/cookie')
