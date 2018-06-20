@@ -21,22 +21,39 @@ module.exports = Session;
  * @api private
  */
 
+// this is function create session object
 function Session(req, data) {
   // add a new property to an object
   // this is object
   // req - name of property
   // { value: req } - options
   Object.defineProperty(this, 'req', { value: req });
+
+  // this is define id
   Object.defineProperty(this, 'id', { value: req.sessionID });
 
   // if data is object and data not equal null
   if (typeof data === 'object' && data !== null) {
     // merge data into this, ignoring prototype properties
-    
+
     // what is it?, what is going on in this function?
+    // this is loop (for...in) over all properties of data object
     for (var prop in data) {
+      console.log(prop);
+      // this is (if...in) return true of false
+      // in this case we check if not exists prop property in a current object
+      // then add it to object
       if (!(prop in this)) {
-        this[prop] = data[prop]
+        this[prop] = data[prop];
+        // console.log(this);
+        // output
+        // Session {
+        // cookie:
+        //  { path: '/',
+        //    _expires: 2018-06-20T18:03:40.450Z,
+        //    originalMaxAge: 60000,
+        //    httpOnly: true },
+        // views: 1 }
       }
     }
   }
