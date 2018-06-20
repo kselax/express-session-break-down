@@ -5,12 +5,16 @@
  * MIT Licensed
  */
 
+// this is forbid some syntaxes
+// if you see this it means some code could not work properly
 'use strict';
 
 /**
  * Expose Session.
  */
 
+// exort our function Session
+// in JavaScript definition for Object and functons are equal
 module.exports = Session;
 
 /**
@@ -67,6 +71,12 @@ function Session(req, data) {
  * @api public
  */
 
+// this function is wrapper for Object.defineProperty()
+// Object.defineProperty - this function accepts an objects and add to an object properties
+// it looks like Session.prototype is an object and not property at all
+// when we do object
+// touch is name of added property
+// last parameter is function
 defineMethod(Session.prototype, 'touch', function touch() {
   return this.resetMaxAge();
 });
@@ -78,6 +88,11 @@ defineMethod(Session.prototype, 'touch', function touch() {
  * @api public
  */
 
+// this function is wrapper for Object.defineProperty()
+// it accepts object, property name and functon
+// in this case Session.prototype is an object
+// resetMaxAge is property name and
+// last function
 defineMethod(Session.prototype, 'resetMaxAge', function resetMaxAge() {
   this.cookie.maxAge = this.cookie.originalMaxAge;
   return this;
@@ -91,6 +106,11 @@ defineMethod(Session.prototype, 'resetMaxAge', function resetMaxAge() {
  * @api public
  */
 
+// this function is wrapper for Object.defineProperty
+// variables: Object, method name, function
+// Session.prototype - is an object
+// save is a new method
+// last function
 defineMethod(Session.prototype, 'save', function save(fn) {
   this.req.sessionStore.set(this.id, this, fn || function(){});
   return this;
