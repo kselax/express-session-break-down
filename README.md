@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # express-session
 
 [![NPM Version][npm-image]][npm-url]
@@ -754,3 +755,6 @@ app.get('/bar', function (req, res, next) {
 [downloads-url]: https://npmjs.org/package/express-session
 [gratipay-image]: https://img.shields.io/gratipay/dougwilson.svg
 [gratipay-url]: https://gratipay.com/dougwilson/
+=======
+# express-session-break-down
+>>>>>>> c618479e53c121038c967b15fc494af75d43b1cd
