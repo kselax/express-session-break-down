@@ -22,11 +22,18 @@ module.exports = Session;
  */
 
 function Session(req, data) {
+  // add a new property to an object
+  // this is object
+  // req - name of property
+  // { value: req } - options
   Object.defineProperty(this, 'req', { value: req });
   Object.defineProperty(this, 'id', { value: req.sessionID });
 
+  // if data is object and data not equal null
   if (typeof data === 'object' && data !== null) {
     // merge data into this, ignoring prototype properties
+    
+    // what is it?, what is going on in this function?
     for (var prop in data) {
       if (!(prop in this)) {
         this[prop] = data[prop]
