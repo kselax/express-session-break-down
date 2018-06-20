@@ -5,7 +5,8 @@
  * Copyright(c) 2014-2015 Douglas Christopher Wilson
  * MIT Licensed
  */
-
+ 
+// it doesn't allow use some syntax
 'use strict';
 
 /**
