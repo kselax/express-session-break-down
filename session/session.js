@@ -36,7 +36,6 @@ function Session(req, data) {
   if (typeof data === 'object' && data !== null) {
     // merge data into this, ignoring prototype properties
 
-    // what is it?, what is going on in this function?
     // this is loop (for...in) over all properties of data object
     for (var prop in data) {
       console.log(prop);
@@ -64,7 +63,7 @@ function Session(req, data) {
  * the cookie from expiring when the
  * session is still active.
  *
- * @return {Session} for chaining
+ * @return {Session} for chaining (for chaining means like in jquery sequvel of calls .f1().f2().f3())
  * @api public
  */
 
