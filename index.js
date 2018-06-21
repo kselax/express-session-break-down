@@ -84,10 +84,20 @@ var warning = 'Warning: connect.session() MemoryStore is not\n'
 // what is going on here?
 // creating varialbe defer that is has a function that placed in a variable setImmediate,
 // if it doesn't have a function it will create own function
+//
+// setImmediate - This method is used to break up long running operations and run a callback function immediately after the browser has completed other operations such as events and display updates.
+// if (err) {
+//   defer(next, err);
+// }
+// in this code setImmediate puts functin to an event loop
+// process.nextTick() practically does the same like setImmediate
+// both functions accept other function, in our example we do
+// defer(next, err); it will setImmediate(next, err) or process.nextTick(next, err)
+// where next is a funciton and err is a variable that will pass to next as a argument.
 var defer = typeof setImmediate === 'function'
   ? setImmediate
   : function(fn){ process.nextTick(fn.bind.apply(fn, arguments)) }
-
+// console.log(defer); // { [Function: setImmediate] [Symbol(util.promisify.custom)]: [Function] }
 /**
  * Setup session store with the given `options`.
  *
@@ -106,7 +116,9 @@ var defer = typeof setImmediate === 'function'
  * @public
  */
 
+// this is a main of this middleware
 function session(options) {
+  // var equal options or object
   var opts = options || {}
 
   // get the cookie options
@@ -119,24 +131,32 @@ function session(options) {
   var name = opts.name || opts.key || 'connect.sid'
 
   // get the session store
+  // if not exists store we use MemoryStore
   var store = opts.store || new MemoryStore()
 
   // get the trust proxy setting
   var trustProxy = opts.proxy
 
   // get the resave session option
+  // could be true or false
   var resaveSession = opts.resave;
 
   // get the rolling session option
   var rollingSessions = Boolean(opts.rolling)
 
   // get the save uninitialized session option
+  // it could be true or false
   var saveUninitializedSession = opts.saveUninitialized
 
   // get the cookie signing secret
   var secret = opts.secret
 
+  // typeof operator returns string in this case if it doesn't return 'function'
+  // will be thrown an exception
+  // throw new TypeError('genid option must be a function');
   if (typeof generateId !== 'function') {
+    // The TypeError object represents an error when a value is not of the expected type.
+    // shortly this thin is spawn an exception
     throw new TypeError('genid option must be a function');
   }
 
