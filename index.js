@@ -6,37 +6,51 @@
  * MIT Licensed
  */
 
-// it doesn't allow use some syntax
+// it doesn't allow using some syntax
 'use strict';
 
 /**
  * Module dependencies.
  * @private
  */
-
+// Basic HTTP cookie parser and serializer for HTTP servers.
 var cookie = require('cookie');
+// Module for calculating Cyclic Redundancy Check (CRC) for Node.js and the Browser.
 var crc = require('crc').crc32;
+// A tiny JavaScript debugging utility modelled after Node.js core's debugging technique. Works in Node.js and web browsers.
 var debug = require('debug')('express-session');
+// Deprecate all the things
+// With great modules comes great responsibility; mark things deprecated!
 var deprecate = require('depd')('express-session');
+// Parse a URL with memoization.
 var parseUrl = require('parseurl');
+/*URL and cookie safe UIDs
+Create cryptographically secure UIDs safe for both cookie and URL usage. This is in contrast to modules such as rand-token and uid2 whose UIDs are actually skewed due to the use of % and unnecessarily truncate the UID. Use this if you could still use UIDs with - and _ in them. */
 var uid = require('uid-safe').sync
+// Execute a listener when a response is about to write headers.
   , onHeaders = require('on-headers')
+// sign and unsign cookies
   , signature = require('cookie-signature')
 
-// here we return a Session object from file to var Session and others
+// here we get function Session to varialbe Session
+// for creating an object we have to use a keyword 'new'
 var Session = require('./session/session')
   , MemoryStore = require('./session/memory')
   , Cookie = require('./session/cookie')
-  , Store = require('./session/store')
+  , Store = require('./session/store');
+
+// console.log(Session); // [Function: Session]
+
 
 // environment
 
 var env = process.env.NODE_ENV;
+// console.log(env); undefined
 
 /**
  * Expose the middleware.
  */
-
+// export function that uses for initialization in middleware
 exports = module.exports = session;
 
 /**
@@ -45,6 +59,7 @@ exports = module.exports = session;
 
 exports.Store = Store;
 exports.Cookie = Cookie;
+// constructor for creating session object
 exports.Session = Session;
 exports.MemoryStore = MemoryStore;
 
@@ -53,6 +68,7 @@ exports.MemoryStore = MemoryStore;
  * @private
  */
 
+// this is string variable
 var warning = 'Warning: connect.session() MemoryStore is not\n'
   + 'designed for a production environment, as it will leak\n'
   + 'memory, and will not scale past a single process.';
@@ -63,6 +79,11 @@ var warning = 'Warning: connect.session() MemoryStore is not\n'
  */
 
 /* istanbul ignore next */
+// typeof operator return string value of a variable type
+// it might return 'function' if variable setImmediate is function
+// what is going on here?
+// creating varialbe defer that is has a function that placed in a variable setImmediate,
+// if it doesn't have a function it will create own function
 var defer = typeof setImmediate === 'function'
   ? setImmediate
   : function(fn){ process.nextTick(fn.bind.apply(fn, arguments)) }

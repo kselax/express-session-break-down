@@ -33,16 +33,17 @@ function Session(req, data) {
   // { value: req } - options
   Object.defineProperty(this, 'req', { value: req });
 
-  // this is define id
+  // this defines an id variable
   Object.defineProperty(this, 'id', { value: req.sessionID });
 
   // if data is object and data not equal null
+  // typeof it's an operator that accepts expression of value and returns string 'boolien', 'number', 'string', etc
   if (typeof data === 'object' && data !== null) {
     // merge data into this, ignoring prototype properties
 
     // this is loop (for...in) over all properties of data object
     for (var prop in data) {
-      console.log(prop);
+      // console.log(prop);
       // this is (if...in) return true of false
       // in this case we check if not exists prop property in a current object
       // then add it to object
@@ -127,16 +128,24 @@ defineMethod(Session.prototype, 'save', function save(fn) {
  * @return {Session} for chaining
  * @api public
  */
-
+// custom function it is a wrapper for function Object.defineProperty
+// accepts Object (Session.prototype), property name (reload), function
+//
 defineMethod(Session.prototype, 'reload', function reload(fn) {
   var req = this.req
     , store = this.req.sessionStore;
+  // calls a get function of sessionStore. It should be redis function or any
+  // that serves database
+  // get( key ). it should return value in back
   store.get(this.id, function(err, sess){
     if (err) return fn(err);
     if (!sess) return fn(new Error('failed to load session'));
+    // it might method of store object
+    // each session has its own store
     store.createSession(req, sess);
     fn();
   });
+  // return object for chaining
   return this;
 });
 
@@ -147,11 +156,16 @@ defineMethod(Session.prototype, 'reload', function reload(fn) {
  * @return {Session} for chaining
  * @api public
  */
-
+// custome functin wrapper for Object.defineProperty
+// accepts 3 artuments Object in our case it's Session.prototype
+// property name it's 'destroy'
+// and function implementation
 defineMethod(Session.prototype, 'destroy', function destroy(fn) {
+  // The JavaScript delete operator removes a property from an object;
+  // if no more references to the same property are held, it is eventually released automatically.
   delete this.req.session;
   this.req.sessionStore.destroy(this.id, fn);
-  return this;
+  return this; // return object for chaining
 });
 
 /**
@@ -161,10 +175,13 @@ defineMethod(Session.prototype, 'destroy', function destroy(fn) {
  * @return {Session} for chaining
  * @api public
  */
-
+// custom function wrapper for Object.defineProperty
+// accepts an Object Session.prototype
+// method name 'regenerate'
+// function implementation
 defineMethod(Session.prototype, 'regenerate', function regenerate(fn) {
   this.req.sessionStore.regenerate(this.req, fn);
-  return this;
+  return this; // return this for chaining
 });
 
 /**
@@ -175,6 +192,7 @@ defineMethod(Session.prototype, 'regenerate', function regenerate(fn) {
  * @param {Function} fn
  * @private
  */
+ // wrapper functon for Object.defineProperty
 function defineMethod(obj, name, fn) {
   Object.defineProperty(obj, name, {
     configurable: true,
