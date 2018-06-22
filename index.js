@@ -293,26 +293,44 @@ function session(options) {
     // Handle connection as if there is no session if
     // the store has temporarily disconnected etc
     // if database off, go to next middleware by next function and outptu error
-    debug('store is disconnected')
-    console.log('Here we go');
     if (!storeReady) {
+      // output when DEBUG=express-session node index.js
       debug('store is disconnected')
       next()
       return
     }
 
     // pathname mismatch
+    // [mark]
+    // console.log(req);
+    // console.log(parseUrl.original(req));
+    // console.log(parseUrl(req));
+    // console.log(parseUrl.original(req).path);
+    // parseUrl it's modul functions parseurl
     var originalPath = parseUrl.original(req).pathname || '/'
+    // console.dir(originalPath); // '/'
+
+    // indexOf return position in array;
+    // console.log(cookieOptions.path); // undefined
+    // if not exists cookieOptions.path than look '/' symbol
+    // if !== 0 it means it is not first symbol, go to next middleware
+    // console.log(originalPath.indexOf(cookieOptions.path || '/')); // 0
     if (originalPath.indexOf(cookieOptions.path || '/') !== 0) return next();
 
     // ensure a secret is available or bail
+    console.log(req.secret); // undefined
+    console.log(secret); // [ 'keyboard cat' ]
+    // next(new Error('secret option required for sessions')); // it will stop app and output error
+    // next('some text'); // it will output some text
     if (!secret && !req.secret) {
+      //The Error constructor creates an error object. Instances of Error objects are thrown when runtime errors occur.
       next(new Error('secret option required for sessions'));
       return;
     }
 
     // backwards compatibility for signed cookies
     // req.secret is passed from the cookie parser middleware
+    // [mark]
     var secrets = secret || [req.secret];
 
     var originalHash;
