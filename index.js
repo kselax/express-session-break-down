@@ -120,13 +120,19 @@ var defer = typeof setImmediate === 'function'
 function session(options) {
   // var equal options or object
   var opts = options || {}
-
+  // console.log(opts);
   // get the cookie options
   var cookieOptions = opts.cookie || {}
 
   // get the session id generate function
+  // here is initialization fo generateId function
+  // by defult it's generateSessionId
+  // function generateSessionId(sess) {
+  //   return uid(24);
+  // }
+  // this is define in bottom
   var generateId = opts.genid || generateSessionId
-
+  // console.log(generateId);
   // get the session cookie name
   var name = opts.name || opts.key || 'connect.sid'
 
@@ -160,52 +166,103 @@ function session(options) {
     throw new TypeError('genid option must be a function');
   }
 
+  // if we didn't define resave parameter it will show message
   if (resaveSession === undefined) {
+    // it's function from dept module that is mark everything in your module as depricated
     deprecate('undefined resave option; provide resave option');
-    resaveSession = true;
+    resaveSession = true; // this is by default value
   }
-
+  // if you didn't specify explicitely value for saveUninitializedSession
+  // you'll get warning message
   if (saveUninitializedSession === undefined) {
+    // it's output message for your module, see npm module dept
     deprecate('undefined saveUninitialized option; provide saveUninitialized option');
-    saveUninitializedSession = true;
+    saveUninitializedSession = true; // set up default value for
   }
 
+  // console.log(opts.unset); // undefined
+  // by default it's undefined
+  // here is going on checking, destroy or keep if distinguish than throw an exception
   if (opts.unset && opts.unset !== 'destroy' && opts.unset !== 'keep') {
+    // TypeError is object represents an error when a value is not of the expected type
     throw new TypeError('unset option must be "destroy" or "keep"');
   }
 
   // TODO: switch to "destroy" on next major
+  // if opts.unset === destroy our var unsetDestroy will be getting true,
+  // by default it gets false
   var unsetDestroy = opts.unset === 'destroy'
+  // console.log(unsetDestroy);
 
+  //  what is Array.isArray()
+  // Array.isArray - method determines whether the passed value is Array
+  // console.log(secret);
+  // it's check secret, and if it is empty might throw an exception
   if (Array.isArray(secret) && secret.length === 0) {
+    // TypeError - object represents an error when the value is not of the expected type
     throw new TypeError('secret option array must contain one or more strings');
   }
 
+  // if secret == true and secret is not Array
+  // it will translate secret to Array
   if (secret && !Array.isArray(secret)) {
+    // console.log('here we go');
+    // transform secret to Array
     secret = [secret];
+    // console.log(secret);
   }
 
+  // check if you didn't specify explicitely secret, you'll get an error
+  // from a dept node modules
   if (!secret) {
+    // output an error from dept modules by funciton depricated
     deprecate('req.secret; provide secret option');
   }
 
   // notify user that this store is not
   // meant for a production environment
   /* istanbul ignore next: not tested */
+  // output warnings if you use databse by defult MemoryStore that is not used for
+  // production, you have to use one other
   if ('production' == env && store instanceof MemoryStore) {
+    // outputs the warning message to the web console
+    // difference with output in browser console it will have icon
     console.warn(warning);
   }
 
   // generates the new session
+  // what is going on here
+  // console.log(store);
+  // here we add a new member to object store and asign to it a function
+  // other words we add function to our store object
+  // store object represents a database, it could be Redis or whatever you wnat
+  // here is define a funciton definition
   store.generate = function(req){
+    // console.log(req);
+    // it has function that use node.js module uid-safe for generating uid
     req.sessionID = generateId(req);
+    // this is a session object from file Session = require('./session/session')
     req.session = new Session(req);
+    // what is the Cookie object
+    // this is object from file Cookie = require('./session/cookie')
     req.session.cookie = new Cookie(cookieOptions);
 
+    // what is going on here?
     if (cookieOptions.secure === 'auto') {
+      // issecure - is custom function defined in the bottom
+      // trustProxy - is a value from user input opts.proxy
+      // definition from npm
+      // proxy
+      // Trust the reverse proxy when setting secure cookies (via the "X-Forwarded-Proto" header).
+      // The default value is undefined.
+      // true The "X-Forwarded-Proto" header will be used.
+      // false All headers are ignored and the connection is considered secure only if there is a direct TLS/SSL connection.
+      // undefined Uses the "trust proxy" setting from express
       req.session.cookie.secure = issecure(req, trustProxy);
     }
+    // console.log(this);
   };
+  // console.log(store);
 
   var storeImplementsTouch = typeof store.touch === 'function';
 
@@ -542,6 +599,8 @@ function session(options) {
  */
 
 function generateSessionId(sess) {
+  // this is npm module uid-safe
+  // Create cryptographically secure UIDs safe for both cookie and URL usage.
   return uid(24);
 }
 
