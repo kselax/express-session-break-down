@@ -279,9 +279,12 @@ function session(options) {
     storeReady = true
   })
 
+
   // this is looks like closure
   return function session(req, res, next) {
+
     // self-awareness
+    // if req.session exists go to next middleware
     if (req.session) {
       next()
       return
@@ -289,6 +292,9 @@ function session(options) {
 
     // Handle connection as if there is no session if
     // the store has temporarily disconnected etc
+    // if database off, go to next middleware by next function and outptu error
+    debug('store is disconnected')
+    console.log('Here we go');
     if (!storeReady) {
       debug('store is disconnected')
       next()
