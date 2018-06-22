@@ -318,8 +318,8 @@ function session(options) {
     if (originalPath.indexOf(cookieOptions.path || '/') !== 0) return next();
 
     // ensure a secret is available or bail
-    console.log(req.secret); // undefined
-    console.log(secret); // [ 'keyboard cat' ]
+    // console.log(req.secret); // undefined
+    // console.log(secret); // [ 'keyboard cat' ]
     // next(new Error('secret option required for sessions')); // it will stop app and output error
     // next('some text'); // it will output some text
     if (!secret && !req.secret) {
@@ -330,7 +330,7 @@ function session(options) {
 
     // backwards compatibility for signed cookies
     // req.secret is passed from the cookie parser middleware
-    // [mark]
+    // if secret false then req.secret
     var secrets = secret || [req.secret];
 
     var originalHash;
@@ -342,9 +342,12 @@ function session(options) {
     req.sessionStore = store;
 
     // get the session ID from the cookie
+    // cookieId should be like this G2l2hgtne35pqLWNVv0G4tWtjCWPm5nf
     var cookieId = req.sessionID = getcookie(req, name, secrets);
+    // console.log('cookieId = ' + cookieId); // G2l2hgtne35pqLWNVv0G4tWtjCWPm5nf
 
     // set-cookie
+    // [mark]
     onHeaders(res, function(){
       if (!req.session) {
         debug('no session');
@@ -640,21 +643,30 @@ function generateSessionId(sess) {
  * @private
  */
 
+// a helper function that returns unsigned cookies
 function getcookie(req, name, secrets) {
+  // return all cookies form req
+  // console.log(req.headers.cookie);
   var header = req.headers.cookie;
   var raw;
   var val;
 
   // read from cookie header
+  // if cookie exists
   if (header) {
+    // cookie.parse it's funciton from npm cookie that parse cookies and return an object
     var cookies = cookie.parse(header);
-
+    // console.log(cookies);
+    // name is passed in this function argument
     raw = cookies[name];
-
+    // console.log(raw);
+    // if exist cookie raw
     if (raw) {
-      if (raw.substr(0, 2) === 's:') {
+      if (raw.substr(0, 2) === 's:') { // get first two symbols and compare with 's:'
+        // unsigncookie is our custom function accept name secret
+        // slice - The slice() method returns a shallow copy of a portion of an array into a new array object selected from begin to end (end not included)
         val = unsigncookie(raw.slice(2), secrets);
-
+        // console.log(val);
         if (val === false) {
           debug('cookie signature invalid');
           val = undefined;
@@ -665,16 +677,19 @@ function getcookie(req, name, secrets) {
     }
   }
 
+  // now it seems not to need
   // back-compat read from cookieParser() signedCookies data
+  // if not exists val and exists req.signedCookies then val = req.signedCookies[name]
   if (!val && req.signedCookies) {
     val = req.signedCookies[name];
-
     if (val) {
       deprecate('cookie should be available in req.headers.cookie');
     }
   }
 
   // back-compat read from cookieParser() cookies data
+  // if val not exists but exists req.cookies
+  // then val = raw = req.cookies[name]
   if (!val && req.cookies) {
     raw = req.cookies[name];
 
@@ -697,7 +712,7 @@ function getcookie(req, name, secrets) {
   }
 
   return val;
-}
+} // function getcookie(req, name, secrets) {
 
 /**
  * Hash the given `sess` object omitting changes to `.cookie`.
@@ -792,8 +807,12 @@ function setcookie(res, name, val, secret, options) {
  * @returns {String|Boolean}
  * @private
  */
+ // our custome helper function it returns unsigned value
 function unsigncookie(val, secrets) {
+  // secrets is Array of secret keys
   for (var i = 0; i < secrets.length; i++) {
+    // secrets[i] has whole word
+    // signature.usign is npm module cookie-signature
     var result = signature.unsign(val, secrets[i]);
 
     if (result !== false) {
