@@ -258,23 +258,28 @@ function session(options) {
       // true The "X-Forwarded-Proto" header will be used.
       // false All headers are ignored and the connection is considered secure only if there is a direct TLS/SSL connection.
       // undefined Uses the "trust proxy" setting from express
+      // issecure return false or true, here we set up property secure to object Coockie
       req.session.cookie.secure = issecure(req, trustProxy);
     }
     // console.log(this);
   };
   // console.log(store);
 
+  // if typeof return functon than variable true
   var storeImplementsTouch = typeof store.touch === 'function';
 
   // register event listeners for the store to track readiness
   var storeReady = true
   store.on('disconnect', function ondisconnect() {
+    // console.log('here we go disconnect');
     storeReady = false
   })
   store.on('connect', function onconnect() {
+    // console.log('here we go connect');
     storeReady = true
   })
 
+  // this is looks like closure
   return function session(req, res, next) {
     // self-awareness
     if (req.session) {
@@ -588,8 +593,8 @@ function session(options) {
 
       next();
     });
-  };
-};
+  }; // return function session(req, res, next) /* it might a closure */
+}; // function session(options) /* main function of all middleware */
 
 /**
  * Generate a session ID for a new session.
@@ -698,13 +703,16 @@ function hash(sess) {
  * @private
  */
 
+// function return false or true
 function issecure(req, trustProxy) {
   // socket is https server
+  // if exists connection and encrypted, return true
   if (req.connection && req.connection.encrypted) {
     return true;
   }
 
   // do not trust proxy
+  // if we set up opt.proxy to false
   if (trustProxy === false) {
     return false;
   }
@@ -712,6 +720,7 @@ function issecure(req, trustProxy) {
   // no explicit trust; try req.secure from express
   if (trustProxy !== true) {
     var secure = req.secure;
+    // typeof return string 'boolen', then secure = secure, else false
     return typeof secure === 'boolean'
       ? secure
       : false;
@@ -719,11 +728,17 @@ function issecure(req, trustProxy) {
 
   // read the proto from x-forwarded-proto header
   var header = req.headers['x-forwarded-proto'] || '';
+  // indexOf returns the first index where element could be found
+  // it will seek ',' index in header array
+  // in this case header is array of symbols
   var index = header.indexOf(',');
+  // if something found proto = index and index != -1 (means something was found by header.indexOf(','))
   var proto = index !== -1
+    // substr return string from 0 to index in lowercase
     ? header.substr(0, index).toLowerCase().trim()
+    // simply translate header to lowercase
     : header.toLowerCase().trim()
-
+  // if proto === https return true
   return proto === 'https';
 }
 
