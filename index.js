@@ -28,6 +28,7 @@ var parseUrl = require('parseurl');
 Create cryptographically secure UIDs safe for both cookie and URL usage. This is in contrast to modules such as rand-token and uid2 whose UIDs are actually skewed due to the use of % and unnecessarily truncate the UID. Use this if you could still use UIDs with - and _ in them. */
 var uid = require('uid-safe').sync
 // Execute a listener when a response is about to write headers.
+// This will add the listener listener to fire when headers are emitted for res. The listener is passed the response object as it's context (this). Headers are considered to be emitted only once, right before they are sent to the client.
   , onHeaders = require('on-headers')
 // sign and unsign cookies
   , signature = require('cookie-signature')
@@ -348,12 +349,17 @@ function session(options) {
 
     // set-cookie
     // [mark]
+    // onHeaders = require('on-headers')
+    // this is function npm module on-headers, accept res and cusom function
     onHeaders(res, function(){
       if (!req.session) {
         debug('no session');
         return;
       }
 
+      // this is a custom function
+      // shouldSetCookie returns false or true and checks
+      //  false when typeof req.sessionID !== string
       if (!shouldSetCookie(req)) {
         return;
       }
@@ -364,15 +370,27 @@ function session(options) {
         return;
       }
 
+      // if touch not false
+      // console.log('touched = ' + touched);
+      // console.log('req.session.cookie.maxAge = ' + req.session.cookie.maxAge);
+      // if false need to refresh cookie MaxAge
       if (!touched) {
         // touch session
+        // console.log('here we go');
+        // touch is session function that calls resetMaxAge
+        // this.cookie.maxAge = this.cookie.originalMaxAge;
         req.session.touch()
-        touched = true
+        touched = true // set up flag to true
       }
 
       // set cookie
+      // req.session.cookie.data it has get data() inside cookie object
+      // name by default is var name = opts.name || opts.key || 'connect.sid'
+      // [mark]
       setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data);
-    });
+    }); // onHeaders(res, function(){
+
+
 
     // proxy end() to commit the session
     var _end = res.end;
@@ -407,7 +425,7 @@ function session(options) {
           ret = true;
           return ret;
         }
-
+        // console.log(res.getHeader('Content-Length'));
         var contentLength = Number(res.getHeader('Content-Length'));
 
         if (!isNaN(contentLength) && contentLength > 0) {
@@ -529,7 +547,17 @@ function session(options) {
     }
 
     // check if session has been modified
+    // this is closure function that return false or true
+    // see is req.session object
+    // return true if originalId !== sess.id OR
+    // originalHash !== hash(sess)
     function isModified(sess) {
+      // return true if originalId !== sess.id
+      //  if not originalId !== sess.id === true then
+      // return originalHash !== hash(sess);
+      // originalId and originalHash are equal false
+      // and sess.id it's req.session.id
+      // hash
       return originalId !== sess.id || originalHash !== hash(sess);
     }
 
@@ -568,16 +596,23 @@ function session(options) {
     }
 
     // determine if cookie should be set on response
+    // return false or true
     function shouldSetCookie(req) {
       // cannot set cookie without a session ID
+      // if sessionID not equal string, return false
       if (typeof req.sessionID !== 'string') {
         return false;
       }
-
+      // if cookieId != req.sessionID will be retured saveUninitializedSession value if it is equal true
+      // instead isModified(req.session)
+      // : will be returned rollingSessions if true, else
+      // req.session.cookie.expires != null && isModified(req.session)
+      // console.log(req.session);
+      console.log(hash(req.session));
       return cookieId != req.sessionID
         ? saveUninitializedSession || isModified(req.session)
         : rollingSessions || req.session.cookie.expires != null && isModified(req.session);
-    }
+    } // function shouldSetCookie(req) {
 
     // generate a session if the browser doesn't send a sessionID
     if (!req.sessionID) {
@@ -721,17 +756,28 @@ function getcookie(req, name, secrets) {
  * @return {String}
  * @private
  */
-
+// it's a halper function that accept session object
+// sess = req.session
+// function returns something like this 197427101 (check sum)
 function hash(sess) {
+  // crc - Module for calculating Cyclic Redundancy Check (CRC) for Node.js and the Browser.
+  // var crc = require('crc').crc32;
+  // console.log(sess);
+  // here JSON.stringify accepts sess that is req.session and apply to her
+  // callback function and removes 'coockie' property
+  // then crc
+  // return number summing
   return crc(JSON.stringify(sess, function (key, val) {
+    // console.log('key = ' + key + ' val = ' +  val);
     // ignore sess.cookie property
     if (this === sess && key === 'cookie') {
       return
     }
 
-    return val
+    // console.log('val = ' + val);
+    return val // this is a reqursively call. it will use val to dig deeper
   }))
-}
+} // function hash(sess) {
 
 /**
  * Determine if request is secure.
@@ -786,16 +832,28 @@ function issecure(req, trustProxy) {
  *
  * @private
  */
-
+// a custom halper function
 function setcookie(res, name, val, secret, options) {
+  // name var name = opts.name || opts.key || 'connect.sid' by default
+  // val is req.sessionID
+  // secret is secret[0]
+  // signature = require('cookie-signature')
   var signed = 's:' + signature.sign(val, secret);
+
+  // make serialization
+  // cookie.serialize(name, value, options)
+  // console.log(options);
   var data = cookie.serialize(name, signed, options);
+  // console.log(data);
 
   debug('set-cookie %s', data);
-
+  // what is the res.getHeader('set-cookie')
+  // this is something from onHeaders = require('on-headers') module
   var prev = res.getHeader('set-cookie') || [];
+  // console.log(res.getHeader); //[]
   var header = Array.isArray(prev) ? prev.concat(data) : [prev, data];
 
+  // and this the same onHeaders = require('on-headers'), normally it is not have this functions
   res.setHeader('set-cookie', header)
 }
 

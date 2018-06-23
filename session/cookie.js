@@ -94,6 +94,7 @@ Cookie.prototype = {
    * @api private
    */
 
+  // this will call like req.session.cookie.data
   get data() {
     return {
       originalMaxAge: this.originalMaxAge
